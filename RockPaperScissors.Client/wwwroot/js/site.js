@@ -3,12 +3,58 @@
 
 var connection = new signalR.HubConnectionBuilder().withUrl("/mainHub").build();
 
-connection.on("ShowResult", function (user, message) {
-    console.log("show result");
+connection.on("ReceiveScore", function (score) {
+    console.log("Score:")
+    console.log(score);
+
+    const name = $("#name").val();
+    for (var playerName in score) {
+        var playerScore = score[playerName];
+
+        if(playerName === name){
+            window.leftScore = playerScore;
+            updateLeftScore(playerName);         
+        }
+        else{
+            window.rightScore = playerScore;
+            updateRightScore(playerName);            
+        }
+    }
 });
 
+connection.on("ReceiveState", function (state) {
+    console.log("State:")
+    console.log(state);
+    disableButtons();
+
+    const name = $("#name").val();
+    for (var playerName in state) {
+        var player = state[playerName];
+        
+        if(playerName !== name){
+            window.right = player.selection;
+            setRightImageSrc(player.selection+".png");
+        }
+    }
+});
+
+function updateLeftScore(name){
+    $("#left-score").text(name + "(" + window.leftScore + ")");
+}
+
+function updateRightScore(name){
+    $("#right-score").text(name + "(" + window.rightScore + ")");
+}
+
+function disableButtons(){
+    $("#rock-button, #paper-button, #scissors-button").hide();
+}
+
 connection.start().then(function () {
-    document.getElementById("sendButton").disabled = false;
+    const name = $("#name").val();
+    connection.invoke("Join", name).catch(function (err) {
+        return console.error(err.toString());
+    });
 }).catch(function (err) {
     return console.error(err.toString());
 });
@@ -17,14 +63,17 @@ window.rock = "rock";
 window.paper = "paper";
 window.scissors = "scissors";
 window.left = window.rock;
+window.leftScore = 0;
 window.right = window.rock;
+window.rightScore = 0;
 
 // Write your JavaScript code.
 function setLeftPaper(){
     window.left = window.paper;
     setLeftImageSrc("paper.png");
 
-    connection.invoke("SelectPaper").catch(function (err) {
+    const name = $("#name").val();
+    connection.invoke("SelectPaper", name).catch(function (err) {
         return console.error(err.toString());
     });
 }
@@ -33,7 +82,8 @@ function setLeftRock(){
     window.left = window.rock;
     setLeftImageSrc("rock.png");
 
-    connection.invoke("SelectRock").catch(function (err) {
+    const name = $("#name").val();
+    connection.invoke("SelectRock", name).catch(function (err) {
         return console.error(err.toString());
     });
 }
@@ -42,7 +92,8 @@ function setLeftScissors(){
     window.left = window.scissors;
     setLeftImageSrc("scissors.png");
 
-    connection.invoke("SelectScissors").catch(function (err) {
+    const name = $("#name").val();
+    connection.invoke("SelectScissors", name).catch(function (err) {
         return console.error(err.toString());
     });
 }
@@ -84,15 +135,26 @@ $("#scissors-button").click(function(){
 
 function leftWon(){
     $("#result").text("Left Won");
+    window.leftScore++;
+    updateLeftScore($("#name").val());
 }
 
 function rightWon(){
     $("#result").text("Right Won");
+    window.rightScore++;
+    updateRightScore("");
 }
 
 function draw(){
     $("#result").text("Draw");
 }
+
+$("#ready-button").click(function(){
+    const name = $("#name").val();
+    connection.invoke("Ready", name).catch(function (err) {
+        return console.error(err.toString());
+    });
+});
 
 $("#winner-button").click(function(){
     if(window.left === window.rock){

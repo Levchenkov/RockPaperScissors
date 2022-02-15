@@ -5,7 +5,9 @@
 <div class="row">
     <div class="col">
         <div class="text-center">
-            The First Player
+            <span>The First Player: </span>
+            <span id="left-score">@ViewBag.Name</span>
+            <input type="hidden" value="@ViewBag.Name" id="name"/>
         </div>
         <div class="text-center">
             <img id="left-image" src="rock.png"  width="300" alt="Image"/>
@@ -14,18 +16,21 @@
             <button type="button" class="btn btn-secondary" id="rock-button">Rock</button>
             <button type="button" class="btn btn-light" id="paper-button">Paper</button>
             <button type="button" class="btn btn-dark" id="scissors-button">Scissors</button>
+            
         </div>
     </div>
     <div class="col">
         <div class="text-center">
-            The Second Player
+            <span>The Second Player: </span>
+            <span id="right-score"></span>
         </div>
         <div class="text-center">
             <img id="right-image" src="rock.png" width="300" alt=""/>
         </div>
     </div>
 </div>
-<div class="text-center">
+<div class="text-center" style="padding-top: 20px">
+    @* <button type="button" class="btn btn-success" id="ready-button">Ready</button> *@
     <button type="button" class="btn btn-primary" id="winner-button">Get The Winner</button>
 </div>
 <div class="text-center" id="result">
